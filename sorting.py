@@ -1,5 +1,5 @@
 def quick_sort(lst):
-    pivot = lst[len(lst)//2]
+    pivot = lst.pop(len(lst)//2)
     if len(lst) <= 1:
         return lst
     else:
@@ -9,7 +9,7 @@ def quick_sort(lst):
                 right.append(i)
             else:
                 left.append(i)
-        return quick_sort(left) + quick_sort(right)
+        return quick_sort(left) + [pivot] + quick_sort(right)
 
 
 def merge_sort(left, right):
