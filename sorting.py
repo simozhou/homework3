@@ -1,8 +1,8 @@
 def quick_sort(lst):
-    pivot = lst.pop(len(lst)//2)
     if len(lst) <= 1:
         return lst
     else:
+        pivot = lst.pop(0)
         left, right = [], []
         for i in lst:
             if i > pivot:
@@ -43,3 +43,6 @@ def merge(lst):
     right_sorted = merge(right)
 
     return merge_sort(left_sorted, right_sorted)
+
+if __name__=='__main__':
+    print(quick_sort([7,6,5,4,3,2,1]))
