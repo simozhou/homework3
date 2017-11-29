@@ -1,12 +1,15 @@
 import time
+import sorting
 import timeit
 import platform
 import random
 import csv
 import numpy as np
+import pandas
+import matplotlib.pyplot as plt
 
-DEFAULT_NUMBER = 100000 #100k
-DEFAULT_POPULATION = range(1000000) #1m
+DEFAULT_NUMBER = 100000  # 100k
+DEFAULT_POPULATION = range(1000000)  # 1m
 
 
 class TimeTest(object):
@@ -57,15 +60,13 @@ class TimeTest(object):
             # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
             # self.test_result as {'bst_insertion': {bst.size(): time}}
 
-
-
     def _test_it_quick_sort(self, arr, key):
-        self.test_result['quick_sort'][key] = timeit.Timer("sorting.quick_sort(" + str(arr) + ")",
-                                                           globals=globals()).autorange()[1]
+        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
+                                                            globals=globals(), number=10)
 
     def _test_it_merge_sort(self, arr, key):
-        self.test_result['merge_sort'][key] = timeit.Timer("sorting.merge(" + str(arr) + ")", globals=globals()
-                                                           ).autorange()[1]
+        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                            number=10)
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -86,10 +87,9 @@ class TimeTest(object):
         pass
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     a = TimeTest()
     print("time test generated!")
     t = time.time()
     a.test_it()
-    t = time.time()- t
-    print(a.test_result, t)
+    t = time.time() - t
