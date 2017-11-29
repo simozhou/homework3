@@ -3,11 +3,10 @@ import timeit
 import platform
 import random
 import csv
+import numpy as np
 
-
-DEFAULT_NUMBER = 100000
-STANDARD_DIMENSIONS = [10, 15, 100, 150, 1000, 1500, 10000, 15000, 100000]
-DEFAULT_POPULATION = range(10000000)
+DEFAULT_NUMBER = 100000 #100k
+DEFAULT_POPULATION = range(1000000) #1m
 
 
 class TimeTest(object):
@@ -21,16 +20,20 @@ class TimeTest(object):
 
     """
 
-    def __init__(self, array=None):
-        self.test_result = dict(quick_sort={}, merge_sort={}, binary_insertion={}, binary_get_random={}, binary_delete={},
+    def __init__(self, array=None, max_val=DEFAULT_NUMBER):
+        # this is the dict of dicts where the values obtained from the test_it func will be stored.
+        self.test_result = dict(quick_sort={}, merge_sort={}, binary_insertion={}, binary_get_random={},
+                                binary_delete={},
                                 heap_insert={}, heap_get_max={}, heap_remove={})
+        # dict of all the list to use for testing
         self.array_pool = {}
+        # both for summary() purrrrrposes
         self.cpu = platform.processor()
         self.os = platform.platform()
 
         if array is None:
-            # we generate the arrays of random numbers
-            for i in STANDARD_DIMENSIONS:
+            # we generate the arrays of random numbers with a logarithmic distance one with the other
+            for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         else:
             for lst in array:
@@ -44,21 +47,27 @@ class TimeTest(object):
 
         """
         for key, arr in self.array_pool.items():
-
             # sorting algorithms
 
-            self.test_result['quick_sort'][key] = timeit.Timer("sorting.quick_sort("+str(arr)+")", setup= 'import sorting',
-                                                            ).autorange()[1]
-            self.test_result['merge_sort'][key] = timeit.Timer("sorting.merge("+str(arr)+")", setup= 'import sorting',
-                                                            ).autorange()[1]
+            self._test_it_quick_sort(arr, key)
+            self._test_it_merge_sort(arr, key)
+
             # BSTs implementation
+            # TODO implement the bst module
+            # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
+            # self.test_result as {'bst_insertion': {bst.size(): time}}
 
-            bst_setup = "import bst; tree1 = bst.BinaryTree(); arr_ins = arr[:-1]; for i in arr_ins: bst.insert(i)"
-# TODO implement the bst module
-            self.test_result['binary_insertion'][key] = timeit.Timer("bst.insert(arr[-1])", setup=bst_setup).autorange()[1]
 
 
-    def csv(self, name='test'+"right now"): # TODO implement a right now stringer
+    def _test_it_quick_sort(self, arr, key):
+        self.test_result['quick_sort'][key] = timeit.Timer("sorting.quick_sort(" + str(arr) + ")",
+                                                           globals=globals()).autorange()[1]
+
+    def _test_it_merge_sort(self, arr, key):
+        self.test_result['merge_sort'][key] = timeit.Timer("sorting.merge(" + str(arr) + ")", globals=globals()
+                                                           ).autorange()[1]
+
+    def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
         csv report" if the self.test_result field has not been populated already.
 
@@ -75,3 +84,12 @@ class TimeTest(object):
 
         """
         pass
+
+
+if __name__=='__main__':
+    a = TimeTest()
+    print("time test generated!")
+    t = time.time()
+    a.test_it()
+    t = time.time()- t
+    print(a.test_result, t)
