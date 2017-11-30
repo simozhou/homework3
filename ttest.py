@@ -5,11 +5,12 @@ import platform
 import random
 import csv
 import numpy as np
-import pandas
+import pandas as pd
 import matplotlib.pyplot as plt
 
-DEFAULT_NUMBER = 100000  # 100k
+DEFAULT_NUMBER = 1000  # 100k
 DEFAULT_POPULATION = range(1000000)  # 1m
+DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
 
 
 class TimeTest(object):
@@ -38,6 +39,10 @@ class TimeTest(object):
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
+        # to use a more accurate logarithmic scale, to improe plotting and statistics
+        elif array is "e_log":
+            for i in DEFAULT_SIZES:
+                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         else:
             for lst in array:
                 self.array_pool[len(lst)] = lst
@@ -59,6 +64,7 @@ class TimeTest(object):
             # TODO implement the bst module
             # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
             # self.test_result as {'bst_insertion': {bst.size(): time}}
+
 
     def _test_it_quick_sort(self, arr, key):
         self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
@@ -89,7 +95,8 @@ class TimeTest(object):
 
 if __name__ == '__main__':
     a = TimeTest()
-    print("time test generated!")
+    print("time test generated!", a.array_pool.keys())
     t = time.time()
-    a.test_it()
+
+    print(a.test_it())
     t = time.time() - t
