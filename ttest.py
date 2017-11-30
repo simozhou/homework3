@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-DEFAULT_NUMBER = 1000  # 100k
+DEFAULT_NUMBER = 100000  # 100k
 DEFAULT_POPULATION = range(1000000)  # 1m
 DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
 
@@ -39,7 +39,7 @@ class TimeTest(object):
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
-        # to use a more accurate logarithmic scale, to improe plotting and statistics
+        # to use a more accurate logarithmic scale, to improve plotting and statistics
         elif array is "e_log":
             for i in DEFAULT_SIZES:
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
@@ -65,14 +65,15 @@ class TimeTest(object):
             # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
             # self.test_result as {'bst_insertion': {bst.size(): time}}
 
+            #when everything is done and populated, we transform everything into a pandas Data Frame
 
     def _test_it_quick_sort(self, arr, key):
-        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
-                                                            globals=globals(), number=10)
+        self.test_result['quick_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
+                                                            globals=globals(), number=10)})
 
     def _test_it_merge_sort(self, arr, key):
-        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
-                                                            number=10)
+        self.test_result['merge_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                            number=10)})
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
