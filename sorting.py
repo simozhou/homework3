@@ -1,3 +1,5 @@
+
+
 def quick_sort(lst):
     if len(lst) <= 1:
         return lst
