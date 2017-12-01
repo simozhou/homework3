@@ -7,7 +7,11 @@ import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import heap
+# import bst
+# TODO repair the heap module on maxChild/minChild
+# import heap
+
+random.seed(123)
 DEFAULT_NUMBER = 100000  # 100k
 DEFAULT_POPULATION = range(1000000)  # 1m
 DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
@@ -39,7 +43,7 @@ class TimeTest(object):
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
-        # to use a more accurate logarithmic scale, to improve plotting and statistics
+        # to use a more accurate logarithmic scale, to improve plotting and statistics quality
         elif array is "e_log":
             for i in DEFAULT_SIZES:
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
@@ -65,18 +69,14 @@ class TimeTest(object):
             # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
             # self.test_result as {'bst_insertion': {bst.size(): time}}
 
-            #when everything is done and populated, we transform everything into a pandas Data Frame
+            # when everything is done and populated, we transform everything into a pandas Data Frame
 
-    def _test_it_quick_sort(self, arr, key):
-        self.test_result['quick_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
-                                                            globals=globals(), number=10)})
+            ttree, ins_counter = bst.BinaryTree(), 0
+            # the biggest array of our array_pool
+            for num in self.array_pool[100000]:
+                ttree[num] = 0
 
-    def _test_it_merge_sort(self, arr, key):
-        self.test_result['merge_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
-                                                            number=10)})
 
-    def _test_it_heap_get_max(self):
-        self.test_result['merge_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit('heap.maxheapfy')})
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -96,6 +96,18 @@ class TimeTest(object):
         """
         pass
 
+    def _test_it_quick_sort(self, arr, key):
+        self.test_result['quick_sort'] = pd.DataFrame(
+            {'array size': key, 'time': timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
+                                                      globals=globals(), number=10)})
+
+    def _test_it_merge_sort(self, arr, key):
+        self.test_result['merge_sort'] = pd.DataFrame(
+            {'array size': key, 'time': timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                      number=10)})
+    # TODO repair this function
+    def _test_it_heap_get_max(self, arr, key):
+        self.test_result['merge_sort'] = pd.DataFrame({'array size': key, 'time': timeit.timeit('heap.maxheapfy')})
 
 if __name__ == '__main__':
     a = TimeTest()
