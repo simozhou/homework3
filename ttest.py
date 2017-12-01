@@ -7,7 +7,7 @@ import csv
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+import heap
 DEFAULT_NUMBER = 100000  # 100k
 DEFAULT_POPULATION = range(1000000)  # 1m
 DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
@@ -74,6 +74,9 @@ class TimeTest(object):
     def _test_it_merge_sort(self, arr, key):
         self.test_result['merge_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
                                                             number=10)})
+
+    def _test_it_heap_get_max(self):
+        self.test_result['merge_sort'] = pd.DataFrame({'array size':key, 'time':timeit.timeit('heap.maxheapfy')})
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
