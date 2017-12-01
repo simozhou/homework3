@@ -6,7 +6,9 @@ import random
 import csv
 import numpy as np
 import pandas as pd
+import functools
 import matplotlib.pyplot as plt
+
 # import bst
 # TODO repair the heap module on maxChild/minChild
 # import heap
@@ -71,12 +73,19 @@ class TimeTest(object):
 
             # when everything is done and populated, we transform everything into a pandas Data Frame
 
-            ttree, ins_counter = bst.BinaryTree(), 0
-            # the biggest array of our array_pool
-            for num in self.array_pool[100000]:
-                ttree[num] = 0
+            # ttree, ins_counter = bst.BinaryTree(), 0
+            # array_pool_keys = self.array_pool.keys()
+            # # the biggest array of our array_pool
+            # for index, num in enumerate(self.array_pool[100000]):
+            #     if index+1 in array_pool_keys:
+            #         self.test_result['binary_insertion'] = timeit.timeit('ttree[num] = num',
+            #                                                             globals=globals(), number=1)
+            #     else:
+            #         ttree[num] = num
 
-
+        # eventually we pandas up the test_result and we peek on the results
+        self._pandator()
+        self.test_result.head()
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -97,22 +106,28 @@ class TimeTest(object):
         pass
 
     def _test_it_quick_sort(self, arr, key):
-        self.test_result['quick_sort'] = pd.DataFrame(
-            {'array size': key, 'time': timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
-                                                      globals=globals(), number=10)})
+        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
+                                                            globals=globals(), number=10)
 
     def _test_it_merge_sort(self, arr, key):
-        self.test_result['merge_sort'] = pd.DataFrame(
-            {'array size': key, 'time': timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
-                                                      number=10)})
+        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                            number=10)
+
     # TODO repair this function
     def _test_it_heap_get_max(self, arr, key):
-        self.test_result['merge_sort'] = pd.DataFrame({'array size': key, 'time': timeit.timeit('heap.maxheapfy')})
+        self.test_result['merge_sort'][key] = timeit.timeit('heap.maxheapify')
+
+    def _pandator(self):
+        """transform the collected results from dict to pandas DataFrames, merging them together into a unique Df"""
+        for key, value in self.test_result.items():
+            self.test_result[key] = pd.DataFrame(value, columns=['array size', key])
+        self.test_result = functools.reduce(lambda left, right: pd.merge(left, right, on='array size'),
+                                            self.test_result.values())
+
 
 if __name__ == '__main__':
     a = TimeTest()
     print("time test generated!", a.array_pool.keys())
     t = time.time()
-
     print(a.test_it())
     t = time.time() - t
