@@ -4,13 +4,12 @@ import bst
 import timeit
 import platform
 import random
-import csv
 import numpy as np
 import pandas
 import matplotlib.pyplot as plt
 
 DEFAULT_NUMBER = 100000  # 100k
-DEFAULT_POPULATION = [10,100,1000,10000,100000]  # 1m
+DEFAULT_POPULATION = [10, 100, 1000, 10000, 100000]  # 1m
 
 
 class TimeTest(object):
@@ -34,14 +33,15 @@ class TimeTest(object):
         # both for summary() purrrrrposes
         self.cpu = platform.processor()
         self.os = platform.platform()
-
-        if array is None:
-            # we generate the arrays of random numbers with a logarithmic distance one with the other
-            for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
-                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
-        else:
-            for lst in array:
-                self.array_pool[len(lst)] = lst
+        for i in DEFAULT_POPULATION:
+            self.array_pool[i] = random.sample(range(1000000), k=i)
+            # if array is None:
+            #     # we generate the arrays of random numbers with a logarithmic distance one with the other
+            #     for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
+            #         self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
+            # else:
+            #     for lst in array:
+            #         self.array_pool[len(lst)] = lst
 
     def test_it(self):
         """generates a number of arrays of increasing size each of random integers and tests them over
@@ -55,28 +55,32 @@ class TimeTest(object):
 
             self._test_it_quick_sort(arr, key)
             self._test_it_merge_sort(arr, key)
-        print("sorting done!")
-        # BSTs implementation
-        # TODO implement the bst module
-        # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
-        # self.test_result as {'bst_insertion': {bst.size(): time}}
+        print("sorting timing done!")
 
-        insertion_counter, tree = 0, bst.BinarySearchTree()
-        for i in range(DEFAULT_POPULATION[-1]):
+        # BSTs implementation
+
+        insertion_counter = 0
+        global tree
+        tree = bst.BinarySearchTree()
+        for bst_key in self.array_pool[100000]:
             insertion_counter += 1
             if insertion_counter in DEFAULT_POPULATION:
-                self._test_it_binary_get_max(i, tree)
-                self._test_it_binary_get_random(i, tree)
-                self._test_it_binary_insertion(0, tree, i)
+                self._test_it_binary_get_max(insertion_counter)
+                self._test_it_binary_get_random(insertion_counter)
+                self._test_it_binary_insertion(0, insertion_counter)
             else:
-                tree.put(i, 0)
-        print("insertion timing done!")
+                tree.put(bst_key, 0)
+        print("insertion, get random, get max timing done!")
+
         # TODO this function doesn't work to me, but we'll see
-        for i in range(DEFAULT_POPULATION[-1]):
-            if i in DEFAULT_POPULATION:
-                self._test_it_binary_remove(i, tree)
+        delete_counter = 0
+        for bst_key in self.array_pool[100000]:
+            delete_counter += 1
+            if delete_counter in DEFAULT_POPULATION:
+                self._test_it_binary_delete(delete_counter)
             else:
-                tree.delete(i)
+                tree.delete(bst_key)
+        print("removal timing done!")
 
     def _test_it_quick_sort(self, arr, key):
         self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
@@ -86,20 +90,20 @@ class TimeTest(object):
         self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
                                                             number=10)
 
-    def _test_it_binary_insertion(self, val, tree, key):
-        self.test_result['binary_insertion'][key] = timeit.timeit("tree.put(" + str(key) + "," + val + ")",
+    def _test_it_binary_insertion(self, val, key):
+        self.test_result['binary_insertion'][key] = timeit.timeit("tree.put(" + str(key) + ",'" + str(val) + "')",
                                                                   globals=globals(), number=1)
 
-    def _test_it_binary_remove(self, key, tree):
+    def _test_it_binary_delete(self, key):
         self.test_result["binary_delete"][key] = timeit.timeit("tree.delete(" + str(key) + ")", globals=globals(),
                                                                number=1)
 
-    def _test_it_binary_get_max(self, key, tree):
+    def _test_it_binary_get_max(self, key):
         self.test_result['binary_get_max'][key] = timeit.timeit("tree.findMax()", globals=globals(), number=10)
 
-    def _test_it_binary_get_random(self, key, tree):
-        self.test_result['binary_get_random'][key] = timeit.timeit("tree.get(key)",
-                                                                   setup="key = random.randint(0, len(tree)-1)",
+    def _test_it_binary_get_random(self, key):
+        rand_key = random.randint(0, len(tree))
+        self.test_result['binary_get_random'][key] = timeit.timeit("tree.get(" + str(rand_key) + ")",
                                                                    globals=globals(),
                                                                    number=10)
 
@@ -128,3 +132,4 @@ if __name__ == '__main__':
     t = time.time()
     a.test_it()
     t = time.time() - t
+    print(a.test_result, t)
