@@ -1,15 +1,24 @@
 import time
 import sorting
+import bst
 import timeit
 import platform
 import random
 import csv
 import numpy as np
-import pandas
+import pandas as pd
+import functools
 import matplotlib.pyplot as plt
+import heapq
 
+# import bst
+# TODO repair the heap module on maxChild/minChild
+# import heap
+
+random.seed(123)
 DEFAULT_NUMBER = 100000  # 100k
 DEFAULT_POPULATION = range(1000000)  # 1m
+DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
 
 
 class TimeTest(object):
@@ -26,7 +35,7 @@ class TimeTest(object):
     def __init__(self, array=None, max_val=DEFAULT_NUMBER):
         # this is the dict of dicts where the values obtained from the test_it func will be stored.
         self.test_result = dict(quick_sort={}, merge_sort={}, binary_insertion={}, binary_get_random={},
-                                binary_delete={},
+                                binary_delete={}, binary_get_max={},
                                 heap_insert={}, heap_get_max={}, heap_remove={})
         # dict of all the list to use for testing
         self.array_pool = {}
@@ -37,6 +46,10 @@ class TimeTest(object):
         if array is None:
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
+                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
+        # to use a more accurate logarithmic scale, to improve plotting and statistics quality
+        elif array is "e_log":
+            for i in DEFAULT_SIZES:
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         else:
             for lst in array:
@@ -54,19 +67,44 @@ class TimeTest(object):
 
             self._test_it_quick_sort(arr, key)
             self._test_it_merge_sort(arr, key)
+        print("sorting timing done!")
 
-            # BSTs implementation
-            # TODO implement the bst module
-            # the idea was to get the maximum lenght dict and populate it with timing and storing the values in
-            # self.test_result as {'bst_insertion': {bst.size(): time}}
+        # BSTs implementation
 
-    def _test_it_quick_sort(self, arr, key):
-        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
-                                                            globals=globals(), number=10)
+        insertion_counter = 0
+        global tree
+        tree = bst.BinarySearchTree()
+        for bst_key in self.array_pool[100000]:
+            insertion_counter += 1
+            if insertion_counter in self.array_pool.keys():
+                self._test_it_binary_get_max(insertion_counter)
+                self._test_it_binary_get_random(insertion_counter)
+                self._test_it_binary_insertion(0, insertion_counter)
+            else:
+                tree.put(bst_key, 0)
+        print("insertion, get random, get max timing done!")
 
-    def _test_it_merge_sort(self, arr, key):
-        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
-                                                            number=10)
+        # TODO set array_pool[100000] to maximum in  every case
+        delete_counter = len(tree)
+        for bst_key in self.array_pool[100000]:
+            delete_counter -= 1
+            if delete_counter in DEFAULT_POPULATION:
+                self._test_it_binary_delete(delete_counter)
+            else:
+                tree.delete(bst_key)
+        print("removal timing done!")
+
+        # heap implementation
+        global heaper
+        heaper = []
+        heap_counter = 0
+        for heap_key in self.array_pool[100000]:
+            if heap_counter in self.array_pool.keys():
+                self._test_it_heap_get_max(heap_counter)
+                self._test_it_heap_insert(heap_counter, heap_key)
+
+        self._pandator()
+        self.test_result.head()
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -86,10 +124,55 @@ class TimeTest(object):
         """
         pass
 
+    # sorting impl
+    def _test_it_quick_sort(self, arr, key):
+        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")",
+                                                            globals=globals(), number=10)
+
+    def _test_it_merge_sort(self, arr, key):
+        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                            number=10)
+
+    # bst impl
+    def _test_it_binary_insertion(self, val, key):
+        self.test_result['binary_insertion'][key] = timeit.timeit("tree.put(" + str(key) + ",'" + str(val) + "')",
+                                                                  globals=globals(), number=1)
+
+    def _test_it_binary_delete(self, key):
+        self.test_result["binary_delete"][key] = timeit.timeit("tree.delete(" + str(key) + ")", globals=globals(),
+                                                               number=1)
+
+    def _test_it_binary_get_max(self, key):
+        self.test_result['binary_get_max'][key] = timeit.timeit("tree.findMax()", globals=globals(), number=10)
+
+    def _test_it_binary_get_random(self, key):
+        rand_key = random.randint(0, len(tree))
+        self.test_result['binary_get_random'][key] = timeit.timeit("tree.get(" + str(rand_key) + ")",
+                                                                   globals=globals(),
+                                                                   number=10)
+
+    #heap impl
+    def _test_it_heap_insert(self, key, value):
+        self.test_result['heap_insert'][key] = timeit.timeit('heapq.heappush(heaper,'+str(value)+')', number=1,
+                                                             globals=globals())
+
+    # TODO repair this function
+    def _test_it_heap_get_max(self, key):
+        self.test_result['heap_get_max'][key] = timeit.timeit('heaper[0]', number=10, globals=globals())
+
+    # TODO fix this function
+    def _pandator(self):
+        """transform the collected results from dict to pandas DataFrames, merging them together into a unique Df"""
+        for key, value in self.test_result.items():
+            self.test_result[key] = pd.DataFrame(value, columns=['array size', key])
+        self.test_result = functools.reduce(lambda left, right: pd.merge(left, right, on='array size'),
+                                            self.test_result.values())
+
 
 if __name__ == '__main__':
     a = TimeTest()
-    print("time test generated!")
+    print("time test generated!", a.array_pool.keys())
     t = time.time()
-    a.test_it()
+    print(a.test_it())
     t = time.time() - t
+    print(a.test_result, t)
