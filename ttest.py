@@ -45,7 +45,7 @@ class TimeTest(object):
 
         if array is None:
             # we generate the arrays of random numbers with a logarithmic distance one with the other
-            for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
+            for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=False, dtype=int):
                 self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         # to use a more accurate logarithmic scale, to improve plotting and statistics quality
         elif array is "e_log":
@@ -79,17 +79,19 @@ class TimeTest(object):
             if insertion_counter in self.array_pool.keys():
                 self._test_it_binary_get_max(insertion_counter)
                 self._test_it_binary_get_random(insertion_counter)
-                self._test_it_binary_insertion(0, insertion_counter)
+                # VALUE, KEY
+                self._test_it_binary_insertion(bst_key, insertion_counter)
             else:
+                # KEY, VALUE
                 tree.put(bst_key, 0)
         print("insertion, get random, get max timing done!")
 
         # TODO set array_pool[100000] to maximum in  every case
         delete_counter = len(tree)
-        for bst_key in self.array_pool[100000]:
+        for bst_key in self.array_pool[DEFAULT_NUMBER]:
             delete_counter -= 1
-            if delete_counter in DEFAULT_POPULATION:
-                self._test_it_binary_delete(delete_counter)
+            if delete_counter in self.array_pool.keys():
+                self._test_it_binary_delete(bst_key, delete_counter)
             else:
                 tree.delete(bst_key)
         print("removal timing done!")
@@ -98,13 +100,15 @@ class TimeTest(object):
         global heaper
         heaper = []
         heap_counter = 0
-        for heap_key in self.array_pool[100000]:
+        for heap_key in self.array_pool[DEFAULT_NUMBER]:
             if heap_counter in self.array_pool.keys():
                 self._test_it_heap_get_max(heap_counter)
                 self._test_it_heap_insert(heap_counter, heap_key)
+            else:
+                heapq.heappush(heaper, heap_key)
 
-        self._pandator()
-        self.test_result.head()
+        # self._pandator()
+        # self.test_result.head()
 
     def csv(self, name='test' + "right now"):  # TODO implement a right now stringer
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -135,11 +139,11 @@ class TimeTest(object):
 
     # bst impl
     def _test_it_binary_insertion(self, val, key):
-        self.test_result['binary_insertion'][key] = timeit.timeit("tree.put(" + str(key) + ",'" + str(val) + "')",
+        self.test_result['binary_insertion'][key] = timeit.timeit("tree.put(" + str(val) + ",0)",
                                                                   globals=globals(), number=1)
 
-    def _test_it_binary_delete(self, key):
-        self.test_result["binary_delete"][key] = timeit.timeit("tree.delete(" + str(key) + ")", globals=globals(),
+    def _test_it_binary_delete(self, val, key):
+        self.test_result["binary_delete"][key] = timeit.timeit("tree.delete(" + str(val) + ")", globals=globals(),
                                                                number=1)
 
     def _test_it_binary_get_max(self, key):
@@ -170,8 +174,8 @@ class TimeTest(object):
 
 
 if __name__ == '__main__':
-    a = TimeTest()
-    print("time test generated!", a.array_pool.keys())
+    a = TimeTest(array='e_log')
+    print("time test generated!")
     t = time.time()
     print(a.test_it())
     t = time.time() - t
