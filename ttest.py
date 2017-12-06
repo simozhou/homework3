@@ -101,6 +101,7 @@ class TimeTest(object):
         heaper = []
         heap_counter = 0
         for heap_key in self.array_pool[DEFAULT_NUMBER]:
+            heap_counter += 1
             if heap_counter in self.array_pool.keys():
                 self._test_it_heap_get_max(heap_counter)
                 self._test_it_heap_insert(heap_counter, heap_key)

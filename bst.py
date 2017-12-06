@@ -202,8 +202,7 @@ class BinarySearchTree:
             current = current.rightChild
         return current
 
-    def remove(self, currentNodeKey):
-        currentNode = self.getNode(currentNodeKey)
+    def remove(self, currentNode):
         if currentNode.isLeaf():  # leaf
             if currentNode == currentNode.parent.leftChild:
                 currentNode.parent.leftChild = None
@@ -252,4 +251,4 @@ if __name__ == '__main__':
     print(mytree[6])
     print(mytree[2])
     print(mytree[3])
-    mytree.remove(3)
+    mytree.remove(mytree.getNode(3))
