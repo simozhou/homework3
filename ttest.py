@@ -108,6 +108,14 @@ class TimeTest(object):
             else:
                 heapq.heappush(heaper, heap_key)
 
+        for heap_key in self.array_pool[DEFAULT_NUMBER]:
+            heap_counter -= 1
+            if heap_counter in self.array_pool.keys():
+                self._test_it_heap_del_max(heap_counter)
+            else:
+                heapq.heappop(heaper)
+        print("heap removal timing done!")
+
         # self._pandator()
         # self.test_result.head()
 
@@ -164,6 +172,9 @@ class TimeTest(object):
     # TODO repair this function
     def _test_it_heap_get_max(self, key):
         self.test_result['heap_get_max'][key] = timeit.timeit('heaper[0]', number=10, globals=globals())
+
+    def _test_it_heap_del_max(self, key):
+        self.test_result['heap_get_max'][key] = timeit.timeit('heapq.heappop(heaper)', number=10, globals=globals())
 
     # TODO fix this function
     def _pandator(self):
