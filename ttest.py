@@ -179,10 +179,11 @@ class TimeTest(object):
         plt.legend()
         plt.title("Binary get max and binary get random")
         # heap repr
+        # TODO fix this plot
         plt.subplot(325)
         plt.tight_layout()
-        plt.plot(self.test_result.heap_insert, label="Insertion")
-        plt.plot(self.test_result.heap_remove,label="Deletion")
+        plt.scatter(self.test_result.index, self.test_result.heap_insert, label="Insertion", s=0.8)
+        plt.scatter(self.test_result.index, self.test_result.heap_remove,label="Deletion", s=0.8)
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
         plt.xlabel("size")
@@ -190,7 +191,7 @@ class TimeTest(object):
         plt.title("Heap insertion, deletion")
         plt.subplot(326)
         plt.tight_layout()
-        plt.plot(self.test_result.heap_get_max, label="Get max")
+        plt.scatter(self.test_result.index, self.test_result.heap_get_max, label="Get max")
         plt.title("Heap get max")
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
