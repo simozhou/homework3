@@ -112,11 +112,6 @@ class TimeTest(object):
         print("heap insertion, get max and deletion timing done!")
 
         self._pandator()
-        testers = ['quick_sort', 'merge_sort', 'binary_insertion', 'binary_get_random', 'binary_delete',
-                   'binary_get_max', 'heap_insert',
-                   'heap_get_max', 'heap_remove']
-        for col_name in testers:
-            self.test_result = remove_outlier(self.test_result, col_name)
 
     def csv(self, name='common'):
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
