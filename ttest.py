@@ -51,15 +51,16 @@ class TimeTest(object):
         if array is None:
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
-                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
+                self.array_pool[i] = [random.sample(DEFAULT_POPULATION, k=i) for _ in range(30)]
         # to use a more accurate logarithmic scale, to improve plotting and statistics quality
         elif array is "e_log":
             for i in DEFAULT_SIZES:
-                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
-        else:
-            for lst in array:
-                self.array_pool[len(lst)] = lst
-        print("time test generated!")
+                self.array_pool[i] = [random.sample(DEFAULT_POPULATION, k=i) for _ in range(30)]
+        # optional
+        # else:
+        #     for lst in array:
+        #         self.array_pool[len(lst)] = lst
+        # print("time test generated!")
 
     def test_it(self):
         """generates a number of arrays of increasing size each of random integers and tests them over
