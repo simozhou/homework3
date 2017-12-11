@@ -9,10 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import heapq
 
-
-random.seed(123)
+random.seed(521)
 DEFAULT_NUMBER = 100000  # 100k
-DEFAULT_POPULATION = range(1000000)  # 1m
+DEFAULT_POPULATION = range(100000)  # 1m
 DEFAULT_SIZES = [10, 100, 1000, 10000, 100000]
 
 
@@ -36,7 +35,7 @@ class TimeTest(object):
 
     def __init__(self, array=None, max_val=DEFAULT_NUMBER):
         # this is the dict of dicts where the values obtained from the test_it func will be stored.
-        self.test_result = dict(quick_sort={}, quick_sort_se={}, merge_sort={}, merge_sort_se={}, binary_insertion={},
+        self.test_result = dict(quick_sort={}, merge_sort={}, binary_insertion={},
                                 binary_insertion_se={}, binary_get_random={}, binary_get_random_se={},
                                 binary_delete={}, binary_delete_se={}, binary_get_max={}, binary_get_max_se={},
                                 heap_insert={}, heap_insert_se={}, heap_get_max={}, heap_get_max_se={},
@@ -51,16 +50,16 @@ class TimeTest(object):
         if array is None:
             # we generate the arrays of random numbers with a logarithmic distance one with the other
             for i in np.logspace(1.0, np.log10(max_val, dtype=float), base=10.0, endpoint=True, dtype=int):
-                self.array_pool[i] = [random.sample(DEFAULT_POPULATION, k=i) for _ in range(30)]
+                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         # to use a more accurate logarithmic scale, to improve plotting and statistics quality
         elif array is "e_log":
             for i in DEFAULT_SIZES:
-                self.array_pool[i] = [random.sample(DEFAULT_POPULATION, k=i) for _ in range(30)]
+                self.array_pool[i] = random.sample(DEFAULT_POPULATION, k=i)
         # optional
         # else:
         #     for lst in array:
         #         self.array_pool[len(lst)] = lst
-        # print("time test generated!")
+        print("time test generated!")
 
     def test_it(self):
         """generates a number of arrays of increasing size each of random integers and tests them over
@@ -72,8 +71,8 @@ class TimeTest(object):
         for key, arr in self.array_pool.items():
             # sorting algorithms
 
-            self._test_it_quick_sort(arr, key)
-            self._test_it_merge_sort(arr, key)
+            self._test_it_quick_sort(key, arr)
+            self._test_it_merge_sort(key, arr)
         print("sorting timing done!")
 
         # BSTs implementation
@@ -86,8 +85,10 @@ class TimeTest(object):
             if insertion_counter in self.array_pool.keys():
                 self._test_it_binary_get_max(insertion_counter)
                 self._test_it_binary_get_random(insertion_counter)
-                # VALUE, KEY
-                self._test_it_binary_insertion_deletion(insertion_counter, bst_key)
+                # testing over 30 randomnumber AND NOT CHANGING THE TREE
+                self._test_it_binary_insertion_deletion(insertion_counter,
+                                                        random.sample(self.array_pool[DEFAULT_NUMBER], k=30))
+                tree.put(bst_key, 0)
             else:
                 # KEY, VALUE
                 tree.put(bst_key, 0)
@@ -97,12 +98,14 @@ class TimeTest(object):
         global heaper
         heaper = []
         heap_counter = 0
-
         for heap_key in self.array_pool[DEFAULT_NUMBER]:
             heap_counter += 1
             if heap_counter in self.array_pool.keys():
+                # they will add values to heap_temp
                 self._test_it_heap_get_max(heap_counter)
-                self._test_it_heap_insert_delete(heap_counter, heap_array[:30])
+                # NOT CHANGING THE HEAP
+                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=30))
+                heapq.heappush(heaper, heap_key)
             else:
                 heapq.heappush(heaper, heap_key)
         print("heap insertion, get max and deletion timing done!")
@@ -138,11 +141,13 @@ class TimeTest(object):
         plt.subplot(321)
         plt.tight_layout()
         plt.title("Quick sort")
+        plt.grid()
         plt.plot(self.test_result.quick_sort)
         plt.ylabel("time")
         plt.xlabel("size")
         plt.subplot(322)
         plt.tight_layout()
+        plt.grid()
         plt.title("Merge Sort")
         plt.plot(self.test_result.merge_sort)
         plt.ylabel("time")
@@ -150,6 +155,7 @@ class TimeTest(object):
         # binary tree repr
         plt.subplot(323)
         plt.tight_layout()
+        plt.grid()
         plt.plot(self.test_result.binary_delete, label="Delete")
         plt.plot(self.test_result.binary_insertion, label="Insert")
         plt.yscale('log')
@@ -159,6 +165,7 @@ class TimeTest(object):
         plt.legend()
         plt.subplot(324)
         plt.tight_layout()
+        plt.grid()
         plt.plot(self.test_result.binary_get_max, label="Get max")
         plt.plot(self.test_result.binary_get_random, label="Get random")
         plt.ylabel("$\log(time)$")
@@ -169,11 +176,11 @@ class TimeTest(object):
         # heap repr
         plt.subplot(325)
         plt.tight_layout()
-        plt.scatter(self.test_result.index, self.test_result.heap_insert, label="Insertion", s=0.8)
-        plt.scatter(self.test_result.index, self.test_result.heap_remove, label="Deletion", s=0.8)
-        plt.yscale('log')
-        plt.ylabel("$\log(time)$")
-        plt.xlabel("size")
+        plt.scatter(self.test_result.heap_insert.index, self.test_result.heap_insert, label="Insertion")
+        plt.scatter(self.test_result.heap_remove.index, self.test_result.heap_remove, label="Deletion")
+        plt.xscale('log')
+        plt.ylabel("time)")
+        plt.xlabel("$\log(size)$")
         plt.legend()
         plt.title("Heap insertion, deletion")
         plt.subplot(326)
@@ -193,33 +200,22 @@ class TimeTest(object):
 
     # sorting impl
     def _test_it_quick_sort(self, key, arr):
-        results = []
-        for _ in range(50):
-            results.append(timeit.timeit("sorting.quick_sort(" + str(arr) + ")", globals=globals(), number=1))
-        self.test_result['quick_sort'][key], self.test_result['quick_sort_se'][key] = _statistify(results)
+        self.test_result['quick_sort'][key] = timeit.timeit("sorting.quick_sort(" + str(arr) + ")", globals=globals(),
+                                                            number=10)
 
-    # slow like shit
     def _test_it_merge_sort(self, key, arr):
-        results = []
-        for _ in range(50):
-            results.append(timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(), number=1))
-        self.test_result['merge_sort'][key], self.test_result['merge_sort_se'][key] = _statistify(results)
+        self.test_result['merge_sort'][key] = timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(),
+                                                            number=10)
 
     # bst impl
     def _test_it_binary_insertion_deletion(self, key, array):
         results_ins, results_del = [], []
-        tree.put(array[0], 0)
         for value in array:
             results_ins.append(timeit.timeit("tree.put(" + str(value) + ",0)", globals=globals(), number=1))
             results_del.append(timeit.timeit("tree.delete(" + str(value) + ")", globals=globals(), number=1))
         self.test_result['binary_insertion'][key], self.test_result['binary_insertion_se'][key] = _statistify(
             results_ins)
         self.test_result["binary_delete"][key], self.test_result["binary_delete_se"][key] = _statistify(results_del)
-
-    # deprecated
-    def _test_it_binary_delete(self, val, key):
-        self.test_result["binary_delete"][key] = timeit.timeit("tree.delete(" + str(val) + ")", globals=globals(),
-                                                               number=1)
 
     def _test_it_binary_get_max(self, key):
         results = []
@@ -236,11 +232,11 @@ class TimeTest(object):
 
     # heap impl
     def _test_it_heap_insert_delete(self, key, array):
-        heapq.heappush(heaper, array[0])
         results_ins, results_del = [], []
         for value in array:
-            results_ins.append(timeit.timeit('heapq.heappush(heaper,' + str(value) + ')', number=1, globals=globals()))
-            results_del.append(timeit.timeit('heapq.heappop(heaper)', number=1, globals=globals()))
+            setup_line = "copy_heap = heaper"
+            results_ins.append(timeit.timeit('heapq.heappush(copy_heap,' + str(value) + ')', number=1, globals=globals(), setup=setup_line))
+            results_del.append(timeit.timeit('heapq.heappop(copy_heap)', number=1, globals=globals(), setup=setup_line))
         self.test_result['heap_insert'][key], self.test_result['heap_insert_se'][key] = _statistify(results_ins)
         self.test_result['heap_remove'][key], self.test_result['heap_remove_se'][key] = _statistify(results_del)
 
@@ -258,6 +254,7 @@ class TimeTest(object):
     # TODO fix this function
     def _pandator(self):
         """transform the collected results from dict to pandas DataFrames, merging them together into a unique Df"""
+        # noinspection PyTypeChecker
         self.test_result = pd.DataFrame.from_dict(self.test_result)
 
     def print_info(self):
