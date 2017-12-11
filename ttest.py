@@ -87,21 +87,22 @@ class TimeTest(object):
                 self._test_it_binary_get_max(insertion_counter)
                 self._test_it_binary_get_random(insertion_counter)
                 # VALUE, KEY
-                self._test_it_binary_insertion_deletion(bst_key, insertion_counter)
+                self._test_it_binary_insertion_deletion(insertion_counter, bst_key)
             else:
                 # KEY, VALUE
                 tree.put(bst_key, 0)
-        print("binary insertion, get random, get max andd deletion timing done!")
+        print("binary insertion, get random, get max and deletion timing done!")
 
         # heap implementation
         global heaper
         heaper = []
         heap_counter = 0
+
         for heap_key in self.array_pool[DEFAULT_NUMBER]:
             heap_counter += 1
             if heap_counter in self.array_pool.keys():
                 self._test_it_heap_get_max(heap_counter)
-                self._test_it_heap_insert_delete(heap_counter, heap_key)
+                self._test_it_heap_insert_delete(heap_counter, heap_array[:30])
             else:
                 heapq.heappush(heaper, heap_key)
         print("heap insertion, get max and deletion timing done!")
@@ -191,26 +192,26 @@ class TimeTest(object):
         plt.show()
 
     # sorting impl
-    def _test_it_quick_sort(self, arr, key):
+    def _test_it_quick_sort(self, key, arr):
         results = []
         for _ in range(50):
             results.append(timeit.timeit("sorting.quick_sort(" + str(arr) + ")", globals=globals(), number=1))
         self.test_result['quick_sort'][key], self.test_result['quick_sort_se'][key] = _statistify(results)
 
     # slow like shit
-    def _test_it_merge_sort(self, arr, key):
+    def _test_it_merge_sort(self, key, arr):
         results = []
         for _ in range(50):
             results.append(timeit.timeit("sorting.merge(" + str(arr) + ")", globals=globals(), number=1))
         self.test_result['merge_sort'][key], self.test_result['merge_sort_se'][key] = _statistify(results)
 
     # bst impl
-    def _test_it_binary_insertion_deletion(self, val, key):
+    def _test_it_binary_insertion_deletion(self, key, array):
         results_ins, results_del = [], []
-        tree.put(val, 0)
-        for _ in range(50):
-            results_ins.append(timeit.timeit("tree.put(" + str(val) + ",0)", globals=globals(), number=1))
-            results_del.append(timeit.timeit("tree.delete(" + str(val) + ")", globals=globals(), number=1))
+        tree.put(array[0], 0)
+        for value in array:
+            results_ins.append(timeit.timeit("tree.put(" + str(value) + ",0)", globals=globals(), number=1))
+            results_del.append(timeit.timeit("tree.delete(" + str(value) + ")", globals=globals(), number=1))
         self.test_result['binary_insertion'][key], self.test_result['binary_insertion_se'][key] = _statistify(
             results_ins)
         self.test_result["binary_delete"][key], self.test_result["binary_delete_se"][key] = _statistify(results_del)
@@ -222,22 +223,22 @@ class TimeTest(object):
 
     def _test_it_binary_get_max(self, key):
         results = []
-        for _ in range(50):
+        for _ in range(30):
             results.append(timeit.timeit("tree.findMax()", globals=globals(), number=100))
         self.test_result['binary_get_max'][key], self.test_result['binary_get_max_se'][key] = _statistify(results)
 
     def _test_it_binary_get_random(self, key):
         results = []
-        for _ in range(50):
+        for _ in range(30):
             rand_key = random.randint(0, len(tree))
             results.append(timeit.timeit("tree.get(" + str(rand_key) + ")", globals=globals(), number=100))
         self.test_result['binary_get_random'][key], self.test_result['binary_get_random_se'][key] = _statistify(results)
 
     # heap impl
-    def _test_it_heap_insert_delete(self, key, value):
-        heapq.heappush(heaper, value)
+    def _test_it_heap_insert_delete(self, key, array):
+        heapq.heappush(heaper, array[0])
         results_ins, results_del = [], []
-        for _ in range(50):
+        for value in array:
             results_ins.append(timeit.timeit('heapq.heappush(heaper,' + str(value) + ')', number=1, globals=globals()))
             results_del.append(timeit.timeit('heapq.heappop(heaper)', number=1, globals=globals()))
         self.test_result['heap_insert'][key], self.test_result['heap_insert_se'][key] = _statistify(results_ins)
@@ -246,7 +247,7 @@ class TimeTest(object):
     # TODO repair this function
     def _test_it_heap_get_max(self, key):
         results = []
-        for _ in range(50):
+        for _ in range(30):
             results.append(timeit.timeit('heaper[0]', number=10, globals=globals()))
         self.test_result['heap_get_max'][key], self.test_result['heap_get_max_se'][key] = _statistify(results)
 
