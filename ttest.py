@@ -4,16 +4,11 @@ import bst
 import timeit
 import platform
 import random
-import csv
 import numpy as np
 import pandas as pd
-import functools
 import matplotlib.pyplot as plt
 import heapq
 
-# import bst
-# TODO repair the heap module on maxChild/minChild
-# import heap
 
 random.seed(123)
 DEFAULT_NUMBER = 100000  # 100k
@@ -97,17 +92,6 @@ class TimeTest(object):
                 tree.put(bst_key, 0)
         print("binary insertion, get random, get max andd deletion timing done!")
 
-        # deprecated
-        # # TODO set array_pool[100000] to maximum in  every case
-        # delete_counter = len(tree)
-        # for bst_key in self.array_pool[DEFAULT_NUMBER]:
-        #     if delete_counter in self.array_pool.keys():
-        #         self._test_it_binary_delete(bst_key, delete_counter)
-        #     else:
-        #         tree.delete(bst_key)
-        #     delete_counter -= 1
-        # print("binary removal timing done!")
-
         # heap implementation
         global heaper
         heaper = []
@@ -120,15 +104,6 @@ class TimeTest(object):
             else:
                 heapq.heappush(heaper, heap_key)
         print("heap insertion, get max and deletion timing done!")
-
-        # deprecated
-        # for heap_key in self.array_pool[DEFAULT_NUMBER]:
-        #     if heap_counter in self.array_pool.keys():
-        #         self._test_it_heap_del_max(heap_counter)
-        #     else:
-        #         heapq.heappop(heaper)
-        #     heap_counter -= 1
-        # print("heap removal timing done!")
 
         self._pandator()
 
