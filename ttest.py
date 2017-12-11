@@ -8,6 +8,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import heapq
+import copy
 
 random.seed(521)
 DEFAULT_NUMBER = 100000  # 100k
@@ -104,7 +105,7 @@ class TimeTest(object):
                 # they will add values to heap_temp
                 self._test_it_heap_get_max(heap_counter)
                 # NOT CHANGING THE HEAP
-                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=50))
+                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=100))
                 heapq.heappush(heaper, heap_key)
             else:
                 heapq.heappush(heaper, heap_key)
@@ -142,28 +143,28 @@ class TimeTest(object):
         plt.tight_layout()
         plt.title("Quick sort")
         plt.grid()
-        plt.yscale('log')
+        plt.xscale('log')
         plt.plot(self.test_result.quick_sort, marker='.', ms=0.99)
-        plt.ylabel("$\log(time)$")
-        plt.xlabel("size")
+        plt.ylabel("time")
+        plt.xlabel("$\log(size)$")
         plt.subplot(322)
         plt.tight_layout()
         plt.grid()
         plt.title("Merge Sort")
         plt.plot(self.test_result.merge_sort, marker='.', ms=0.99)
-        plt.ylabel("$\log(time)$")
-        plt.xlabel("size")
-        plt.yscale('log')
+        plt.ylabel("time")
+        plt.xlabel("$\log(size)$")
+        plt.xscale('log')
         # binary tree repr
         plt.subplot(323)
         plt.tight_layout()
         plt.grid()
         plt.errorbar(self.test_result.binary_delete.index, self.test_result.binary_delete,
-                     self.test_result.binary_delete_se, label="Delete", ecolor='blue',
-                     fmt='b-o', ms=0.99, capsize=5)
+                     self.test_result.binary_delete_se, label="Delete", ecolor='orange',
+                     fmt='b-o', ms=0.99, capsize=2)
         plt.errorbar(self.test_result.binary_insertion.index, self.test_result.binary_insertion,
                      self.test_result.binary_insertion_se, label="Insert",
-                     ecolor='red', fmt='r-o', ms=0.99, capsize=5)
+                     ecolor='green', fmt='r-o', ms=0.99, capsize=2)
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
         plt.xlabel("$\log(size)$")
@@ -174,9 +175,10 @@ class TimeTest(object):
         plt.tight_layout()
         plt.grid()
         plt.errorbar(self.test_result.binary_get_max.index, self.test_result.binary_get_max,
-                     self.test_result.binary_get_max_se, label="Get max", ecolor='red', fmt='r-o', ms=0.99, capsize=5)
+                     self.test_result.binary_get_max_se, label="Get max", ecolor='green', fmt='r-o', ms=0.99, capsize=2)
         plt.errorbar(self.test_result.binary_get_random.index, self.test_result.binary_get_random,
-                     self.test_result.binary_get_random_se, label="Get random", ecolor='blue', fmt='b-o', ms=0.99, capsize=5)
+                     self.test_result.binary_get_random_se, label="Get random", ecolor='orange', fmt='b-o', ms=0.99,
+                     capsize=2)
         plt.ylabel("$\log(time)$")
         plt.xlabel("$\log(size)$")
         plt.xscale('log')
@@ -186,10 +188,11 @@ class TimeTest(object):
         # heap repr
         plt.subplot(325)
         plt.tight_layout()
+        plt.grid()
         plt.errorbar(self.test_result.heap_insert.index, self.test_result.heap_insert, self.test_result.heap_insert_se,
-                     label="Insertion", ecolor='red', fmt='r-o', ms=0.99, capsize=5)
+                     label="Insertion", ecolor='green', fmt='r-o', ms=0.99, capsize=2)
         plt.errorbar(self.test_result.heap_remove.index, self.test_result.heap_remove, self.test_result.heap_remove_se,
-                     label="Deletion", ecolor='blue', fmt='b-o', ms=0.99, capsize=5)
+                     label="Deletion", ecolor='orange', fmt='b-o', ms=0.99, capsize=2)
         plt.xscale('log')
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
@@ -199,7 +202,7 @@ class TimeTest(object):
         plt.subplot(326)
         plt.tight_layout()
         plt.errorbar(self.test_result.index, self.test_result.heap_get_max, self.test_result.heap_get_max_se,
-                     label="Get max", ecolor='red', ms=0.99, capsize=5)
+                     label="Get max", ecolor='red', ms=0.99, capsize=3)
         plt.title("Heap get max")
         plt.yscale('log')
         plt.xscale('log')
@@ -234,13 +237,13 @@ class TimeTest(object):
 
     def _test_it_binary_get_max(self, key):
         results = []
-        for _ in range(30):
-            results.append(timeit.timeit("tree.findMax()", globals=globals(), number=100))
+        for _ in range(50):
+            results.append(timeit.timeit("tree.findMax()", globals=globals(), number=10))
         self.test_result['binary_get_max'][key], self.test_result['binary_get_max_se'][key] = _statistify(results)
 
     def _test_it_binary_get_random(self, key):
         results = []
-        for _ in range(30):
+        for _ in range(50):
             rand_key = random.randint(0, len(tree))
             results.append(timeit.timeit("tree.get(" + str(rand_key) + ")", globals=globals(), number=100))
         self.test_result['binary_get_random'][key], self.test_result['binary_get_random_se'][key] = _statistify(results)
@@ -248,12 +251,13 @@ class TimeTest(object):
     # heap impl
     def _test_it_heap_insert_delete(self, key, array):
         results_ins, results_del = [], []
+        setupline = 'copy_heap = copy.deepcopy(heaper)'
         for value in array:
-            setup_line = "copy_heap = heaper"
             results_ins.append(
                 timeit.timeit('heapq.heappush(copy_heap,' + str(value) + ')', number=1, globals=globals(),
-                              setup=setup_line))
-            results_del.append(timeit.timeit('heapq.heappop(copy_heap)', number=1, globals=globals(), setup=setup_line))
+                              setup=setupline))
+            results_del.append(timeit.timeit('heapq.heappop(copy_heap)', number=1, globals=globals(), setup=setupline))
+
         self.test_result['heap_insert'][key], self.test_result['heap_insert_se'][key] = _statistify(results_ins)
         self.test_result['heap_remove'][key], self.test_result['heap_remove_se'][key] = _statistify(results_del)
 
@@ -287,9 +291,9 @@ class TimeTest(object):
 
 
 if __name__ == '__main__':
-    a = TimeTest(array='e_log')
+    a = TimeTest('e_log')
     t = time.time()
     a.test_it()
     t = time.time() - t
     print(t)
-    # a.summary(pdf_report=False)
+    a.summary(pdf_report=False)
