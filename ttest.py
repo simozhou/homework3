@@ -160,9 +160,11 @@ class TimeTest(object):
         plt.subplot(323)
         plt.tight_layout()
         plt.grid()
-        plt.errorbar(self.test_result.binary_delete.index, self.test_result.binary_delete, label="Delete", ecolor='red',
+        plt.errorbar(self.test_result.binary_delete.index, self.test_result.binary_delete,
+                     self.test_result.binary_delete_se, label="Delete", ecolor='red',
                      fmt='-o', ms=0.9)
-        plt.errorbar(self.test_result.binary_insertion.index, self.test_result.binary_insertion, label="Insert",
+        plt.errorbar(self.test_result.binary_insertion.index, self.test_result.binary_insertion,
+                     self.test_result.binary_insertion_se, label="Insert",
                      ecolor='red', fmt='-o', ms=0.99)
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
