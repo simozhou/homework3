@@ -87,7 +87,7 @@ class TimeTest(object):
                 self._test_it_binary_get_random(insertion_counter)
                 # testing over 30 randomnumber AND NOT CHANGING THE TREE
                 self._test_it_binary_insertion_deletion(insertion_counter,
-                                                        random.sample(self.array_pool[DEFAULT_NUMBER], k=30))
+                                                        random.sample(self.array_pool[DEFAULT_NUMBER], k=50))
                 tree.put(bst_key, 0)
             else:
                 # KEY, VALUE
@@ -104,7 +104,7 @@ class TimeTest(object):
                 # they will add values to heap_temp
                 self._test_it_heap_get_max(heap_counter)
                 # NOT CHANGING THE HEAP
-                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=30))
+                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=50))
                 heapq.heappush(heaper, heap_key)
             else:
                 heapq.heappush(heaper, heap_key)
@@ -142,30 +142,28 @@ class TimeTest(object):
         plt.tight_layout()
         plt.title("Quick sort")
         plt.grid()
-        plt.xscale('log')
         plt.yscale('log')
         plt.plot(self.test_result.quick_sort, marker='.', ms=0.99)
         plt.ylabel("$\log(time)$")
-        plt.xlabel("$\log(size)$")
+        plt.xlabel("size")
         plt.subplot(322)
         plt.tight_layout()
         plt.grid()
         plt.title("Merge Sort")
         plt.plot(self.test_result.merge_sort, marker='.', ms=0.99)
         plt.ylabel("$\log(time)$")
-        plt.xlabel("$\log(size)$")
-        plt.xscale('log')
+        plt.xlabel("size")
         plt.yscale('log')
         # binary tree repr
         plt.subplot(323)
         plt.tight_layout()
         plt.grid()
         plt.errorbar(self.test_result.binary_delete.index, self.test_result.binary_delete,
-                     self.test_result.binary_delete_se, label="Delete", ecolor='red',
-                     fmt='-o', ms=0.9)
+                     self.test_result.binary_delete_se, label="Delete", ecolor='blue',
+                     fmt='b-o', ms=0.99, capsize=5)
         plt.errorbar(self.test_result.binary_insertion.index, self.test_result.binary_insertion,
                      self.test_result.binary_insertion_se, label="Insert",
-                     ecolor='red', fmt='-o', ms=0.99)
+                     ecolor='red', fmt='r-o', ms=0.99, capsize=5)
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
         plt.xlabel("$\log(size)$")
@@ -176,9 +174,9 @@ class TimeTest(object):
         plt.tight_layout()
         plt.grid()
         plt.errorbar(self.test_result.binary_get_max.index, self.test_result.binary_get_max,
-                     self.test_result.binary_get_max_se, label="Get max", ecolor='red', fmt='-o', ms=0.99)
+                     self.test_result.binary_get_max_se, label="Get max", ecolor='red', fmt='r-o', ms=0.99, capsize=5)
         plt.errorbar(self.test_result.binary_get_random.index, self.test_result.binary_get_random,
-                     self.test_result.binary_get_random_se, label="Get random", ecolor='red', fmt='-o', ms=0.99)
+                     self.test_result.binary_get_random_se, label="Get random", ecolor='blue', fmt='b-o', ms=0.99, capsize=5)
         plt.ylabel("$\log(time)$")
         plt.xlabel("$\log(size)$")
         plt.xscale('log')
@@ -189,9 +187,9 @@ class TimeTest(object):
         plt.subplot(325)
         plt.tight_layout()
         plt.errorbar(self.test_result.heap_insert.index, self.test_result.heap_insert, self.test_result.heap_insert_se,
-                     label="Insertion", ecolor='red', fmt='-o', ms=0.99)
+                     label="Insertion", ecolor='red', fmt='r-o', ms=0.99, capsize=5)
         plt.errorbar(self.test_result.heap_remove.index, self.test_result.heap_remove, self.test_result.heap_remove_se,
-                     label="Deletion", ecolor='red', fmt='-o', ms=0.99)
+                     label="Deletion", ecolor='blue', fmt='b-o', ms=0.99, capsize=5)
         plt.xscale('log')
         plt.yscale('log')
         plt.ylabel("$\log(time)$")
@@ -201,7 +199,7 @@ class TimeTest(object):
         plt.subplot(326)
         plt.tight_layout()
         plt.errorbar(self.test_result.index, self.test_result.heap_get_max, self.test_result.heap_get_max_se,
-                     label="Get max", ecolor='red', ms=0.99)
+                     label="Get max", ecolor='red', ms=0.99, capsize=5)
         plt.title("Heap get max")
         plt.yscale('log')
         plt.xscale('log')
