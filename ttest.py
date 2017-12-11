@@ -105,13 +105,18 @@ class TimeTest(object):
                 # they will add values to heap_temp
                 self._test_it_heap_get_max(heap_counter)
                 # NOT CHANGING THE HEAP
-                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=100))
+                self._test_it_heap_insert_delete(heap_counter, random.sample(self.array_pool[DEFAULT_NUMBER], k=50))
                 heapq.heappush(heaper, heap_key)
             else:
                 heapq.heappush(heaper, heap_key)
         print("heap insertion, get max and deletion timing done!")
 
         self._pandator()
+        testers = ['quick_sort', 'merge_sort', 'binary_insertion', 'binary_get_random', 'binary_delete',
+                   'binary_get_max', 'heap_insert',
+                   'heap_get_max', 'heap_remove']
+        for col_name in testers:
+            self.test_result = remove_outlier(self.test_result, col_name)
 
     def csv(self, name='common'):
         """generates a csv file with the results of the test_it function, returns a "Run test_it before requesting
@@ -213,7 +218,8 @@ class TimeTest(object):
         self.print_info()
 
         if pdf_report:
-            plt.savefig(name="benchmark_analysis_" + self.hashcode + ".pdf", papertype='a4', orientation='portrait')
+            namefile = "benchmark_analysis_" + self.hashcode + ".pdf"
+            plt.savefig(fname=namefile, papertype='a4', orientation='portrait')
         plt.show()
 
     # sorting impl
@@ -278,7 +284,8 @@ class TimeTest(object):
         # noinspection PyTypeChecker
         self.test_result = pd.DataFrame.from_dict(self.test_result)
 
-    def print_info(self):
+    @staticmethod
+    def print_info():
         print('\nPython version  :', platform.python_version())
         print('compiler        :', platform.python_compiler())
 
